@@ -31,7 +31,11 @@ def send_serial(data):
 
     device.write(data + "\n")
     line = ""
+    timeout = time.time()
     while True:
+        if (time.time() - timeout) > 1.0:
+            device.close()
+            return False
         chars = device.read()
         if chars == "\n":
             break
