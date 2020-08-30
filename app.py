@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from bottle import route, run, view, static_file
-import os
+import os, time
 import serial
+import threading
 
 
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
@@ -43,10 +44,20 @@ def send_serial(data):
 
     return True
 
+
+def f():
+    time.sleep(600)
+    send_serial("OFF")
+    lock.release()
+
 @route('/on', method='GET')
 def on():
     if send_serial("ON") == False:
         return 1
+
+    if lock.acquire(False):
+        th = threading.Thread(target=f)
+        th.start()
 
     return 0
 
@@ -57,5 +68,7 @@ def off():
 
     return 0
 
+
+lock = threading.Lock()
 
 run(host='0.0.0.0', port=80, debug=False, reloader=False)
