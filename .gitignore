@@ -1,0 +1,7 @@
+/env
+/node_modules
+/static/scripts/builds
+
+*.pyc
+*.log
+*.csv
