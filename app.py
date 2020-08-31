@@ -25,7 +25,7 @@ def index():
 
 def send_serial(data):
     try:
-        device = serial.Serial("/dev/ttyUSB0", 115200)
+        device = serial.Serial("/dev/ttyUSB0", 115200, timeout=1, writeTimeout=0.1)
     except:
         return False
 
