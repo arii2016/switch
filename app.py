@@ -24,24 +24,16 @@ def index():
     )
 
 def send_serial(data):
-    try:
-        device = serial.Serial("/dev/ttyUSB0", 115200, timeout=1, writeTimeout=0.1)
-    except:
-        return False
-
-    device.write(data + "\n")
+    device.write(data)
     line = ""
     timeout = time.time()
     while True:
-        if (time.time() - timeout) > 1.0:
-            device.close()
+        if (time.time() - timeout) > 2.0:
             return False
         chars = device.read()
         if chars == "\n":
             break
         line += chars
-
-    device.close()
 
     if line != "OK":
         return False
@@ -51,12 +43,12 @@ def send_serial(data):
 
 def f():
     time.sleep(600)
-    send_serial("OFF")
+    send_serial("OFF\n")
     lock.release()
 
 @route('/on', method='GET')
 def on():
-    if send_serial("ON") == False:
+    if send_serial("ON\n") == False:
         return 1
 
     if lock.acquire(False):
@@ -67,12 +59,17 @@ def on():
 
 @route('/off', method='GET')
 def off():
-    if send_serial("OFF") == False:
+    if send_serial("OFF\n") == False:
         return 1
 
     return 0
 
 
+device = serial.Serial("/dev/ttyUSB0", 115200, timeout=1, writeTimeout=0.1)
+# device = serial.Serial("/dev/cu.usbserial-14210", 115200, timeout=1, writeTimeout=0.1)
+
 lock = threading.Lock()
 
 run(host='0.0.0.0', port=80, debug=False, reloader=False)
+
+device.close()
